@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Peluquería VIP</title>
+    <style>
+        /* Variables de color estilo iOS Dark Mode + Dorado */
+        :root {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --primary: #d4af37; /* Dorado */
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --danger: #ff453a;
+            --success: #30d158;
+            --wa-color: #25D366;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px; /* Espacio para el menú inferior */
+        }
+
+        .header {
+            background-color: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 0.5px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .container { padding: 20px; }
+
+        /* Vistas (Pestañas) */
+        .view { display: none; animation: fadeIn 0.3s; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Tarjetas estilo iOS */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-info { display: flex; flex-direction: column; gap: 5px; }
+        .price { color: var(--primary); font-weight: bold; }
+
+        /* Formularios */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 14px; }
+        input, select {
+            width: 100%;
+            background-color: #2c2c2e;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus, select:focus { border: 1px solid var(--primary); }
+
+        /* Botones */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-primary { background-color: var(--primary); color: #000; }
+        .btn-wa { background-color: var(--wa-color); color: white; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;}
+        .btn-danger { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); width: auto; padding: 8px 12px; font-size: 14px; }
+        
+        .btn-small { width: auto; padding: 10px 15px; font-size: 14px; }
+
+        /* Barra de Navegación Inferior (iOS Tab Bar) */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(28, 28, 30, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px 0;
+            border-top: 0.5px solid #333;
+            z-index: 100;
+        }
+
+        .tab-item {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .tab-item.active { color: var(--primary); }
+        .tab-icon { font-size: 24px; }
+
+        h2 { font-size: 22px; margin-top: 0; }
+        h3 { font-size: 18px; color: var(--primary); margin-top: 30px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+
+        /* Modal de Éxito */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center;
+        }
+        .modal { background: var(--card-bg); padding: 25px; border-radius: 14px; text-align: center; width: 80%; }
+        .modal-icon { font-size: 40px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">FA Barbería</div>
+
+    <!-- VISTA: INICIO -->
+    <div id="view-inicio" class="view active container">
+        <h2>Bienvenido</h2>
+        <p style="color: var(--text-muted); line-height: 1.5;">Reserva tu turno de manera rápida y fácil desde tu celular. Explora nuestros servicios y asegura tu lugar.</p>
+        
+        <div class="card" style="flex-direction: column; text-align: center; padding: 30px 15px;">
+            <div style="font-size: 50px; margin-bottom: 10px;">✂️</div>
+            <h3>El mejor estilo</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">Cortes clásicos, degradados, perfilado de barba y más.</p>
+            <button class="btn btn-primary" onclick="switchTab('reservas')">Agendar Ahora</button>
+        </div>
+    </div>
+
+    <!-- VISTA: SERVICIOS (Cliente) -->
+    <div id="view-servicios" class="view container">
+        <h2>Nuestros Servicios</h2>
+        <div id="client-services-list">
+            <!-- Los servicios se cargan dinámicamente aquí -->
+        </div>
+    </div>
+
+    <!-- VISTA: RESERVAS -->
+    <div id="view-reservas" class="view container">
+        <h2>Agendar Turno</h2>
+        <div class="card" style="display: block;">
+            <div class="form-group">
+                <label>Tu Nombre</label>
+                <input type="text" id="resNombre" placeholder="Ej: Jorge Navarro">
+            </div>
+            <div class="form-group">
+                <label>Número de WhatsApp</label>
+                <input type="tel" id="resTel" placeholder="Ej: 099123456">
+            </div>
+            <div class="form-group">
+                <label>Servicio deseado</label>
+                <select id="resServicio">
+                    <!-- Opciones se cargan dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fecha y Hora</label>
+                <input type="datetime-local" id="resFecha">
+            </div>
+            <button class="btn btn-primary" onclick="guardarReserva()">Confirmar Reserva</button>
+        </div>
+    </div>
+
+    <!-- VISTA: ADMIN -->
+    <div id="view-admin" class="view container">
+        <h2>Panel de Administración</h2>
+        <p style="color: var(--text-muted); font-size: 13px;">(Solo visible para dueños/staff)</p>
+        
+        <!-- Agregar Servicio -->
+        <h3>Añadir Nuevo Servicio</h3>
+        <div class="card" style="display: block;">
+            <div class="form-group">
+                <input type="text" id="adminNombreServicio" placeholder="Nombre (Ej: Perfilado de Cejas)">
+            </div>
+            <div class="form-group">
+                <input type="number" id="adminPrecioServicio" placeholder="Precio en $ (Ej: 250)">
+            </div>
+            <button class="btn btn-primary" onclick="adminAgregarServicio()">Guardar Servicio</button>
+        </div>
+
+        <!-- Lista de Servicios para Borrar -->
+        <h3>Servicios Activos</h3>
+        <div id="admin-services-list"></div>
+
+        <!-- Lista de Turnos y WhatsApp -->
+        <h3>Turnos Agendados</h3>
+        <div id="admin-reservas-list"></div>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN -->
+    <div class="modal-overlay" id="modalExito">
+        <div class="modal">
+            <div class="modal-icon">✅</div>
+            <h3 style="margin-top:0; color:white; border:none;">¡Turno Agendado!</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">Tu reserva ha sido guardada. Nos comunicaremos contigo por WhatsApp.</p>
+            <button class="btn btn-primary" onclick="cerrarModal()">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- TAB BAR INFERIOR -->
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('inicio')" id="tab-inicio">
+            <span class="tab-icon">🏠</span>
+            <span>Inicio</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('servicios')" id="tab-servicios">
+            <span class="tab-icon">✂️</span>
+            <span>Servicios</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('reservas')" id="tab-reservas">
+            <span class="tab-icon">📅</span>
+            <span>Reservar</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('admin')" id="tab-admin">
+            <span class="tab-icon">⚙️</span>
+            <span>Admin</span>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS LOCAL ---
+        // Si es la primera vez, carga servicios por defecto
+        let dbServicios = JSON.parse(localStorage.getItem('app_servicios')) || [
+            { id: 1, nombre: "Corte Clásico", precio: 450 },
+            { id: 2, nombre: "Corte + Barba", precio: 600 }
+        ];
+        
+        let dbReservas = JSON.parse(localStorage.getItem('app_reservas')) || [];
+
+        // --- NAVEGACIÓN ---
+        function switchTab(tabId) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            
+            // Mostrar la seleccionada
+            document.getElementById('view-' + tabId).classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            // Actualizar datos de pantalla al entrar
+            if(tabId === 'servicios') renderClientServices();
+            if(tabId === 'reservas') loadServiceOptions();
+            if(tabId === 'admin') {
+                renderAdminServices();
+                renderAdminReservas();
+            }
+        }
+
+        // --- FUNCIONES CLIENTE ---
+        function renderClientServices() {
+            const list = document.getElementById('client-services-list');
+            list.innerHTML = '';
+            dbServicios.forEach(serv => {
+                list.innerHTML += `
+                    <div class="card">
+                        <span style="font-weight: 500;">${serv.nombre}</span>
+                        <span class="price">$${serv.precio}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function loadServiceOptions() {
+            const select = document.getElementById('resServicio');
+            select.innerHTML = '<option value="">Selecciona un servicio...</option>';
+            dbServicios.forEach(serv => {
+                select.innerHTML += `<option value="${serv.nombre}">${serv.nombre} - $${serv.precio}</option>`;
+            });
+        }
+
+        function guardarReserva() {
+            const nombre = document.getElementById('resNombre').value;
+            const tel = document.getElementById('resTel').value;
+            const servicio = document.getElementById('resServicio').value;
+            const fechaHora = document.getElementById('resFecha').value;
+
+            if(!nombre || !tel || !servicio || !fechaHora) {
+                alert("Por favor completa todos los datos."); return;
+            }
+
+            // Formatear fecha para lectura
+            const dateObj = new Date(fechaHora);
+            const fechaFormateada = dateObj.toLocaleString('es-UY', { dateStyle: 'short', timeStyle: 'short' });
+
+            const nuevaReserva = { id: Date.now(), nombre, telefono: tel, servicio, fecha: fechaFormateada };
+            
+            dbReservas.push(nuevaReserva);
+            localStorage.setItem('app_reservas', JSON.stringify(dbReservas));
+
+            // Mostrar Modal de éxito y limpiar formulario
+            document.getElementById('modalExito').style.display = 'flex';
+            document.getElementById('resNombre').value = '';
+            document.getElementById('resTel').value = '';
+            document.getElementById('resServicio').value = '';
+            document.getElementById('resFecha').value = '';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalExito').style.display = 'none';
+            switchTab('inicio');
+        }
+
+        // --- FUNCIONES ADMIN ---
+        function adminAgregarServicio() {
+            const nombre = document.getElementById('adminNombreServicio').value;
+            const precio = document.getElementById('adminPrecioServicio').value;
+            
+            if(!nombre || !precio) return alert("Ingresa nombre y precio.");
+
+            dbServicios.push({ id: Date.now(), nombre, precio });
+            localStorage.setItem('app_servicios', JSON.stringify(dbServicios));
+            
+            document.getElementById('adminNombreServicio').value = '';
+            document.getElementById('adminPrecioServicio').value = '';
+            
+            renderAdminServices();
+        }
+
+        function adminBorrarServicio(id) {
+            dbServicios = dbServicios.filter(s => s.id !== id);
+            localStorage.setItem('app_servicios', JSON.stringify(dbServicios));
+            renderAdminServices();
+        }
+
+        function renderAdminServices() {
+            const list = document.getElementById('admin-services-list');
+            list.innerHTML = '';
+            if(dbServicios.length === 0) list.innerHTML = '<p style="color: gray; font-size: 14px;">No hay servicios.</p>';
+
+            dbServicios.forEach(serv => {
+                list.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <strong>${serv.nombre}</strong>
+                            <span class="price">$${serv.precio}</span>
+                        </div>
+                        <button class="btn btn-danger" onclick="adminBorrarServicio(${serv.id})">Borrar</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAdminReservas() {
+            const list = document.getElementById('admin-reservas-list');
+            list.innerHTML = '';
+            if(dbReservas.length === 0) list.innerHTML = '<p style="color: gray; font-size: 14px;">No hay turnos agendados.</p>';
+
+            // Ordenar para mostrar los más nuevos primero
+            const reservasInvertidas = [...dbReservas].reverse();
+
+            reservasInvertidas.forEach(res => {
+                // Adaptar teléfono para WhatsApp (+598)
+                let numWa = res.telefono.replace(/\D/g, ''); // Quitar espacios o guiones
+                if (numWa.startsWith('0')) numWa = numWa.substring(1); // Quitar el 0 inicial (099 -> 99)
+                if (!numWa.startsWith('598')) numWa = '598' + numWa; // Agregar código de Uruguay
+
+                // Mensaje predeterminado de WhatsApp
+                const mensaje = encodeURIComponent(`Hola ${res.nombre}, te escribo de la peluquería para confirmar tu turno para ${res.servicio} el día ${res.fecha}.`);
+                const enlaceWa = `https://wa.me/${numWa}?text=${mensaje}`;
+
+                list.innerHTML += `
+                    <div class="card" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                        <div style="width: 100%; display: flex; justify-content: space-between;">
+                            <strong>${res.nombre}</strong>
+                            <span style="font-size:12px; color:var(--text-muted);">${res.fecha}</span>
+                        </div>
+                        <div style="font-size:14px;">💇‍♂️ ${res.servicio}</div>
+                        <div style="font-size:14px; color:var(--text-muted);">📞 ${res.telefono}</div>
+                        
+                        <div style="width: 100%; display: flex; gap: 10px; margin-top: 10px;">
+                            <a href="${enlaceWa}" target="_blank" class="btn btn-wa btn-small" style="flex:1;">
+                                💬 Notificar por WhatsApp
+                            </a>
+                            <button class="btn btn-danger" onclick="borrarReserva(${res.id})">X</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function borrarReserva(id) {
+            if(confirm("¿Estás seguro de eliminar este turno?")) {
+                dbReservas = dbReservas.filter(r => r.id !== id);
+                localStorage.setItem('app_reservas', JSON.stringify(dbReservas));
+                renderAdminReservas();
+            }
+        }
+
+        // Iniciar app cargando el inicio
+        switchTab('inicio');
+    </script>
+</body>
+</html>
